@@ -111,9 +111,18 @@ func (insurance *InsuranceChaincode) Delete(stub shim.ChaincodeStubInterface, ar
 
 // Query callback representing the query of a chaincode
 func (insurance *InsuranceChaincode) Query(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
-	if function != "Query" {
-		return nil, errors.New("Invalid query function name. Expecting \"Query\"")
+	fmt.Println("query is running " + function)
+
+	// Handle different functions
+	if function == "read" { //read a variable
+		return insurance.read(stub, args)
 	}
+	fmt.Println("query did not find func: " + function)
+
+	return nil, errors.New("Received unknown function query: " + function)
+}
+func (insurance *InsuranceChaincode) read(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+
 	var PolicyNo string // Entities
 	var err error
 
