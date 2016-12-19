@@ -36,93 +36,59 @@ func (insurance *InsuranceChaincode) Invoke(stub shim.ChaincodeStubInterface, fu
 	var item Policy
 	item.PolicyNo = args[0]
 
-	switch function {
-	case "Insert":
-		if len(args) != 10 {
-			return nil, errors.New("Incorrect number of arguments. Deposit function expecting 10")
-		}
-
-		//解析参数
-		item.PolicyType = args[1]
-		item.Startdate = args[2]
-		item.Enddate = args[3]
-		item.Status = args[4]
-		item.PolicyHolder = args[5]
-		item.Assured = args[6]
-		item.Beneficiary = args[7]
-		item.Premium = args[8]
-		item.Amount = args[9]
-
-		detailbytes, err := stub.GetState(item.PolicyNo)
-
-		//保单号重复CHECK
-		if detailbytes != nil {
-			errmsg := "The Policy No is duplicate."
-			fmt.Println(errmsg)
-			return nil, errors.New(errmsg)
-		}
-
-		if detailbytes == nil && err == nil {
-			//添加check处理等功能
-
-			//将结构体（保单信息）转化成json数据，然后保存到账本中
-			p, err := json.Marshal(item)
-			err = stub.PutState(item.PolicyNo, p)
-
-			// Write the state to the ledger
-			//err = stub.PutState(args[0], []byte(args))
-			if err != nil {
-				return nil, err
-			}
-		}
-
-	case "Delete":
-		// Deletes an entity from its state
+	if function == "Insert" {
+		return insurance.Insert(stub, args)
+		//	} else if function == "Change" {
+		//		return insurance.change(stub, args)
+	} else if function == "Delete" {
 		return insurance.Delete(stub, args)
-
-	case "Change":
-		if len(args) != 10 {
-			return nil, errors.New("Incorrect number of arguments. Deposit function expecting 10")
-		}
-
-		//解析参数
-		item.PolicyType = args[1]
-		item.Startdate = args[2]
-		item.Enddate = args[3]
-		item.Status = args[4]
-		item.PolicyHolder = args[5]
-		item.Assured = args[6]
-		item.Beneficiary = args[7]
-		item.Premium = args[8]
-		item.Amount = args[9]
-
-		detailbytes, err := stub.GetState(item.PolicyNo)
-
-		//保单号存在CHECK
-		if detailbytes == nil {
-			errmsg := "The Policy No is not available."
-			fmt.Println(errmsg)
-			return nil, errors.New(errmsg)
-		}
-
-		if detailbytes != nil && err == nil {
-			//添加check处理等功能
-
-			//将结构体（保单信息）转化成json数据，然后保存到账本中
-			p, err := json.Marshal(item)
-			err = stub.PutState(item.PolicyNo, p)
-
-			// Write the state to the ledger
-			//err = stub.PutState(args[0], []byte(args))
-			if err != nil {
-				return nil, err
-			}
-		}
-
-	default:
-		return nil, errors.New("Incorrect function! They may be one of Insert,Delete,Change.")
 	}
 
+	return nil, errors.New("Incorrect function! They may be one of Insert,Delete,Change.")
+}
+
+func (insurance *InsuranceChaincode) Insert(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+
+	var item Policy
+	item.PolicyNo = args[0]
+
+	if len(args) != 10 {
+		return nil, errors.New("Incorrect number of arguments. Deposit function expecting 10")
+	}
+
+	//解析参数
+	item.PolicyType = args[1]
+	item.Startdate = args[2]
+	item.Enddate = args[3]
+	item.Status = args[4]
+	item.PolicyHolder = args[5]
+	item.Assured = args[6]
+	item.Beneficiary = args[7]
+	item.Premium = args[8]
+	item.Amount = args[9]
+
+	detailbytes, err := stub.GetState(item.PolicyNo)
+
+	//保单号重复CHECK
+	if detailbytes != nil {
+		errmsg := "The Policy No is duplicate."
+		fmt.Println(errmsg)
+		return nil, errors.New(errmsg)
+	}
+
+	if detailbytes == nil && err == nil {
+		//添加check处理等功能
+
+		//将结构体（保单信息）转化成json数据，然后保存到账本中
+		p, err := json.Marshal(item)
+		err = stub.PutState(item.PolicyNo, p)
+
+		// Write the state to the ledger
+		//err = stub.PutState(args[0], []byte(args))
+		if err != nil {
+			return nil, err
+		}
+	}
 	return nil, nil
 }
 
